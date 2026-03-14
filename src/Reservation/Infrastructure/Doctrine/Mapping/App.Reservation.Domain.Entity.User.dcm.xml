@@ -1,0 +1,10 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+    <entity name="App\Reservation\Domain\Entity\User" table="users">
+        <id name="id" type="app_uuid" column="id" length="36"/>
+        <embedded name="email" class="App\Reservation\Domain\ValueObject\Email"/>
+        <field name="name" type="string" length="255"/>
+        <field name="passwordHash" type="string" length="255"/>
+        <field name="role" type="string" enum-type="App\Reservation\Domain\ValueObject\UserRole" length="20"/>
+        <field name="createdAt" type="datetime"/>
+    </entity>
+</doctrine-mapping>
