@@ -1,0 +1,21 @@
+{
+    "name": "businessmentor/api",
+    "description": "Business Mentoring Platform API",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "bramus/router": "^1.6",
+        "doctrine/orm": "^3",
+        "doctrine/dbal": "^4",
+        "symfony/cache": "^7"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require-dev": {
+        "doctrine/doctrine-orm-module": "*",
+        "symfony/console": "*"
+    }
+}
