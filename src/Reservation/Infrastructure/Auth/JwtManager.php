@@ -24,25 +24,12 @@ class JwtManager
         ];
 
         return [
-            'refresh_token' => $this->generateRefreshToken($payload),
-            'access_token' => $this->generateAccessToken($payload),
+            'refresh_token' => $this->generateToken($payload, 2592000),
+            'access_token' => $this->generateToken($payload, 900),
         ];
     }
 
-    private function generateRefreshToken(array $payload, int $expirationSeconds = 2592000): string
-    {
-        $issuedAt = time();
-        $expirationTime = $issuedAt + $expirationSeconds;
-
-        $tokenPayload = array_merge($payload, [
-            'iat' => $issuedAt,
-            'exp' => $expirationTime,
-        ]);
-
-        return JWT::encode($tokenPayload, $this->secretKey, 'HS256');
-    }
-
-    private function generateAccessToken(array $payload, int $expirationSeconds = 900): string
+    private function generateToken(array $payload, int $expirationSeconds = 3600): string
     {
         $issuedAt = time();
         $expirationTime = $issuedAt + $expirationSeconds;
