@@ -1,6 +1,6 @@
 <?php
 
-use App\Reservation\Presentation\Http\Controller\MentorController;
+use App\Reservation\Presentation\Http\Controller;
 
 /** @var \DI\Container $container */
 
@@ -12,15 +12,28 @@ $router->set404('(/.*)?', function() {
     echo json_encode(['status' => '404', 'status_text' => 'route not defined']);
 });
 
-$router->mount('/mentors', function() use ($router, $container) {
-    $controller = $container->get(MentorController::class);
+$router->mount('/users', function() use ($router, $container) {
+    $controller = $container->get(Controller\UserController::class);
 
     $router->get('/', function() use ($controller) {
-        $controller->listMentors();
+        $controller->listUsers();
     });
 
-    $router->get('/(\S+)', function($id) use ($controller) {
-        $controller->getMentor($id);
+    $router->get('/(\S+)', function($email) use ($controller) {
+        $controller->getUserByEmail($email);
+    });
+});
+
+$router->mount('/auth', function() use ($router, $container) {
+    $controller = $container->get(Controller\AuthController::class);
+
+    $router->post('/register', function() use ($controller) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $controller->register(
+            $data['email'] ?? '',
+            $data['name'] ?? '',
+            $data['password'] ?? ''
+        );
     });
 });
 
