@@ -1,23 +1,27 @@
 <?php
 
-$router = new \Bramus\Router\Router();
+use App\Reservation\Presentation\Http\Controller\MentorController;
 
-$router->setNamespace('\App\Reservation\Presentation\Http\Controller');
+/** @var \DI\Container $container */
+
+$router = new \Bramus\Router\Router();
 
 $router->set404('(/.*)?', function() {
     header('HTTP/1.1 404 Not Found');
     header('Content-Type: application/json');
-
-    $jsonArray = array();
-    $jsonArray['status'] = "404";
-    $jsonArray['status_text'] = "route not defined";
-
-    echo json_encode($jsonArray);
+    echo json_encode(['status' => '404', 'status_text' => 'route not defined']);
 });
 
-$router->mount('/mentors', function() use ($router) {
-    $router->get('/', 'MentorController@listMentors');
-    $router->get('/{id}', 'MentorController@getMentor');
+$router->mount('/mentors', function() use ($router, $container) {
+    $controller = $container->get(MentorController::class);
+
+    $router->get('/', function() use ($controller) {
+        $controller->listMentors();
+    });
+
+    $router->get('/(\S+)', function($id) use ($controller) {
+        $controller->getMentor($id);
+    });
 });
 
 $router->run();
