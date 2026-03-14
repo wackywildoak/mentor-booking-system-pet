@@ -10,7 +10,7 @@ if (!Type::hasType(UuidType::NAME)) {
     Type::addType(UuidType::NAME, UuidType::class);
 }
 
-$config = require_once __DIR__ . '/../config/config.php';
+$config = require __DIR__ . '/../config/config.php';
 
 $ormConfig = ORMSetup::createXMLMetadataConfig(
     paths: [__DIR__ . '/../src/Reservation/Infrastructure/Doctrine/Mapping'],

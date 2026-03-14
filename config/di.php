@@ -3,7 +3,10 @@
 use App\Reservation\Domain\Repository as Contract;
 use App\Reservation\Application\Service;
 use App\Reservation\Infrastructure\Doctrine\Repository;
+use App\Reservation\Infrastructure\Auth\JwtManager;
 use Doctrine\ORM\EntityManagerInterface;
+
+$config = require __DIR__ . '/config.php';
 
 return [
     EntityManagerInterface::class => function () {
@@ -11,9 +14,9 @@ return [
         return $entityManager;
     },
 
-    Contract\MentorRepositoryInterface::class => function ($container) {
-        return new Repository\DoctrineMentorRepository(
-            $container->get(EntityManagerInterface::class)
+    JwtManager::class => function ($container) use ($config) {
+        return new JwtManager(
+            secretKey: $config['jwt']['secret']
         );
     },
 
@@ -25,7 +28,8 @@ return [
 
     Service\AuthService::class => function ($container) {
         return new Service\AuthService(
-            $container->get(Contract\UserRepositoryInterface::class)
+            $container->get(Contract\UserRepositoryInterface::class),
+            $container->get(JwtManager::class)
         );
     },
 ];
