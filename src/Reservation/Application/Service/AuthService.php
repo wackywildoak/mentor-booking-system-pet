@@ -55,6 +55,32 @@ class AuthService
         $this->userRepository->save($user);
     }
 
+    public function login(LoginUserRequest $userDTO): array
+    {
+        $user = $this->userRepository->findByEmail($userDTO->email);
+        if ($user === null || !password_verify($userDTO->password, $user->passwordHash)) {
+            throw new \Exception('Invalid email or password', 401);
+        }
+
+        return $this->generateTokens($user, Uuid::generate()->value);
+    }
+
+    public function logout(string $token): void
+    {
+        $tokenHash = hash('sha256', $token);
+
+        $tokenData = $this->tokenStorage->find('token_hash', $tokenHash);
+
+        if (empty($tokenData)) {
+            throw new Exception('Неверный токен', 401);
+        } 
+
+        $this->tokenStorage->update(
+            id: $tokenData['id'],
+            isRevoked: true,
+        );
+    }
+
     private function generateTokens(User $user, string $familyId): array
     {
         $refreshToken = bin2hex(random_bytes(16));
@@ -72,16 +98,6 @@ class AuthService
             'refreshToken' => $refreshToken,
             'accessToken' => $accessToken,
         ];
-    }
-
-    public function login(LoginUserRequest $userDTO): array
-    {
-        $user = $this->userRepository->findByEmail($userDTO->email);
-        if ($user === null || !password_verify($userDTO->password, $user->passwordHash)) {
-            throw new \Exception('Invalid email or password', 401);
-        }
-
-        return $this->generateTokens($user, Uuid::generate()->value);
     }
 
     public function refreshToken(string $token): array

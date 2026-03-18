@@ -17,6 +17,7 @@ $router->set404('(/.*)?', function() {
 $router->before('GET|POST', '/.*', function() use ($container) {
     $publicRoutes = [
         '/auth/login',
+        '/auth/logout',
         '/auth/register',
         '/auth/refresh',
     ];
@@ -61,6 +62,10 @@ $router->mount('/auth', function() use ($router, $container) {
             $data['email'] ?? '',
             $data['password'] ?? ''
         );
+    });
+
+    $router->post('/logout', function() use ($controller) {
+        $controller->logout();
     });
 
     $router->post('/refresh', function() use ($controller) {
