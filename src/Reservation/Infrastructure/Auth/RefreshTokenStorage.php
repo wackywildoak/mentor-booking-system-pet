@@ -27,26 +27,27 @@ class RefreshTokenStorage
         bool $isRevoked,
     ): void
     {
+        $now = new \DateTime();
+
         $this->connection->insert($this->refreshTokenTable, [
             'id' => $id,
             'user_id' => $userId,
             'token_hash' => $tokenHash,
             'family_id' => $familyId,
             'is_revoked' => $isRevoked,
+            'expires_at' => $now->format('Y-m-d H:i:s'),
+            'created_at' => $now->format('Y-m-d H:i:s')
         ]);
     }
 
     public function find(string $where, string $parameter)
     {
-        $result = $this->connection->createQueryBuilder()
-            ->select('*')
-            ->from($this->refreshTokenTable)
-            ->where("{$where}=:value")
-            ->setParameter('value', $parameter)
-            ->executeQuery()
-            ->fetchAssociative();
+        return $this->findQuery($where, $parameter)->fetchAssociative();
+    }
 
-        return $result;
+    public function findAll(string $where, string $parameter)
+    {
+        return $this->findQuery($where, $parameter)->fetchAllAssociative();
     }
 
     public function update(
@@ -84,6 +85,18 @@ class RefreshTokenStorage
     public function delete(string $userId): void
     {
         $this->connection->delete($this->refreshTokenTable, ['user_id' => $userId]);
+    }
+
+    private function findQuery(string $where, string $parameter)
+    {
+        $result = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from($this->refreshTokenTable)
+            ->where("{$where}=:value")
+            ->setParameter('value', $parameter)
+            ->executeQuery();
+
+        return $result;
     }
 }
 

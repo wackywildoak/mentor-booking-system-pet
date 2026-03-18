@@ -26,7 +26,10 @@ class AuthController extends AbstractController
         try {
             $this->authService->register($dto);
         } catch (\Exception $e) {
-            throw $e;
+            $this->response(
+                statusCode: $e->getCode(),
+                data: ['error' => $e->getMessage()]
+            );
         }
     }
 
@@ -46,7 +49,21 @@ class AuthController extends AbstractController
             );
         } catch (\Exception $e) {
             $this->response(
-                statusCode: 401,
+                statusCode: $e->getCode(),
+                data: ['error' => $e->getMessage()]
+            );
+        }
+    }
+
+    public function logout(): void
+    {
+        $token = $this->getRequest()->getHeader('Authorization');
+
+        try {
+            $this->authService->logout($token);
+        } catch (\Exception $e) {
+            $this->response(
+                statusCode: $e->getCode(),
                 data: ['error' => $e->getMessage()]
             );
         }
@@ -64,7 +81,7 @@ class AuthController extends AbstractController
             );
         } catch (\Exception $e) {
             $this->response(
-                statusCode: 401,
+                statusCode: $e->getCode(),
                 data: ['error' => $e->getMessage()]
             );
         }

@@ -105,12 +105,32 @@ class AuthService
         $tokenHash = hash('sha256', $token);
 
         $tokenData = $this->tokenStorage->find('token_hash', $tokenHash);
-
+        
         if (!$tokenData || empty($tokenData)) {
-            throw new \Exception("Некорректный токен", 401);
+            throw new \Exception("Некорректный токен или срок действия токена окончено", 401);
         }
 
+        $expiresAt = new \DateTime($tokenData['expires_at']);
+        $now = new \DateTime();
+
+        if ($now->diff($expiresAt)->days >= 30) {
+            $this->tokenStorage->update(
+                id: $tokenData['id'],
+                isRevoked: true,
+            );
+            throw new \Exception("Cрок действия токена окончен", 401);
+        }
+
+        $familyId = $tokenData['family_id'];
         if ($tokenData['is_revoked']) {
+            $allTokenData = $this->tokenStorage->findAll('family_id', $familyId);
+            foreach ($allTokenData as $tokenItem) {
+                 $this->tokenStorage->update(
+                    id: $tokenItem['id'],
+                    isRevoked: true,
+                );
+            }
+
             throw new \Exception('Токен недействителен', 401);
         }
 
@@ -125,7 +145,7 @@ class AuthService
             isRevoked: true,
         );
 
-        return $this->generateTokens($user, $tokenData['family_id']);
+        return $this->generateTokens($user, $familyId);
     }
 
     public function validateToken(string $token): void
