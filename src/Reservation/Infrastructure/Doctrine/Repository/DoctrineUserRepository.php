@@ -17,6 +17,11 @@ class DoctrineUserRepository implements UserRepositoryInterface
         return $this->em->getRepository(User::class)->findAll();
     }
 
+    public function find(string $id): ?User
+    {
+        return $this->em->getRepository(User::class)->findOneBy(['id.value' => $id]);
+    }
+
     public function findByEmail(string $email): ?User
     {
         return $this->em->getRepository(User::class)->findOneBy(['email.value' => $email]);
