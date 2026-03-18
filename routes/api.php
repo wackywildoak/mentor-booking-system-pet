@@ -1,6 +1,8 @@
 <?php
 
 use App\Reservation\Presentation\Http\Controller;
+use App\Reservation\Presentation\Http\Request\Request;
+use App\Reservation\Infrastructure\Middleware\AuthMiddleware;
 
 /** @var \DI\Container $container */
 
@@ -10,6 +12,24 @@ $router->set404('(/.*)?', function() {
     header('HTTP/1.1 404 Not Found');
     header('Content-Type: application/json');
     echo json_encode(['status' => '404', 'status_text' => 'route not defined']);
+});
+
+$router->before('GET|POST', '/.*', function() use ($container) {
+    $publicRoutes = [
+        '/auth/login',
+        '/auth/logout',
+        '/auth/register',
+        '/auth/refresh',
+    ];
+
+    if (in_array($_SERVER['REQUEST_URI'], $publicRoutes)) {
+        return;
+    }
+
+    $authMiddleware = $container->get(AuthMiddleware::class);
+
+    $request = Request::fromGlobals();
+    $authMiddleware->handle($request);
 });
 
 $router->mount('/users', function() use ($router, $container) {
@@ -34,6 +54,22 @@ $router->mount('/auth', function() use ($router, $container) {
             $data['name'] ?? '',
             $data['password'] ?? ''
         );
+    });
+
+    $router->post('/login', function() use ($controller) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $controller->login(
+            $data['email'] ?? '',
+            $data['password'] ?? ''
+        );
+    });
+
+    $router->post('/logout', function() use ($controller) {
+        $controller->logout();
+    });
+
+    $router->post('/refresh', function() use ($controller) {
+        $controller->refresh();
     });
 });
 

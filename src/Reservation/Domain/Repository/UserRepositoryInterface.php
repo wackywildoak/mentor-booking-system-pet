@@ -14,6 +14,12 @@ interface UserRepositoryInterface
     public function all(): array;
 
     /**
+     * @param string $id
+     * @return User|null
+     */
+    public function find(string $id): ?User;
+
+    /**
      * @param string $email
      * @return User|null
      */
