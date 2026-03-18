@@ -14,19 +14,17 @@ class JwtManager
         private string $secretKey
     ) {}
 
-    public function handle(User $user): array
+    public function handle(User $user): string
     {
         $payload = [
             'sub' => $user->id,
             'email' => $user->email,
             'name' => $user->name,
             'role' => $user->role,
+            'createdAt' => (new \DateTime())->format('H:i:s')
         ];
 
-        return [
-            'refresh_token' => $this->generateToken($payload, 2592000),
-            'access_token' => $this->generateToken($payload, 900),
-        ];
+        return $this->generateToken($payload, 900);
     }
 
     private function generateToken(array $payload, int $expirationSeconds = 3600): string
