@@ -59,6 +59,13 @@ class AuthController extends AbstractController
     {
         $token = $this->getRequest()->getHeader('Authorization');
 
+        if (!$token) {
+            $this->response(
+                statusCode: 401,
+                data: ['error' => 'Не указан токен']
+            );
+        }
+
         try {
             $this->authService->logout($token);
         } catch (\Exception $e) {
@@ -72,6 +79,13 @@ class AuthController extends AbstractController
     public function refresh(): void
     {
         $token = $this->getRequest()->getHeader('Authorization');
+
+        if (!$token) {
+            $this->response(
+                statusCode: 401,
+                data: ['error' => 'Не указан токен']
+            );
+        }
 
         try {
             $tokens = $this->authService->refreshToken($token);

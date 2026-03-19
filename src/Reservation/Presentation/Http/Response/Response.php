@@ -25,6 +25,7 @@ class Response
             header("$key: $value");
         }
         echo $this->body;
+        exit;
     }
 
     public function json($data, $statusCode = 200): void
