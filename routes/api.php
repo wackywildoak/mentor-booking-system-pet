@@ -38,20 +38,21 @@ $router->before('GET|POST', '/client(/.*)?', function() use ($request, $containe
         ->handle($request, [UserRole::Client]);
 });
 
-$router->mount('/auth', function() use ($router, $container) {
+$router->mount('/auth', function() use ($router, $container, $request) {
     $controller = $container->get(Controller\AuthController::class);
 
-    $router->post('/register', function() use ($controller) {
-        $data = json_decode(file_get_contents('php://input'), true);
+    $router->post('/register', function() use ($controller, $request) {
+        $data = $request->getData();
         $controller->register(
             $data['email'] ?? '',
             $data['name'] ?? '',
-            $data['password'] ?? ''
+            $data['password'] ?? '',
+            $data['role']
         );
     });
 
-    $router->post('/login', function() use ($controller) {
-        $data = json_decode(file_get_contents('php://input'), true);
+    $router->post('/login', function() use ($controller, $request) {
+        $data = $request->getData();
         $controller->login(
             $data['email'] ?? '',
             $data['password'] ?? ''
