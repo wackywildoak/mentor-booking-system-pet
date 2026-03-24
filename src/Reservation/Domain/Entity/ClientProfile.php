@@ -9,14 +9,43 @@ use App\Reservation\Domain\ValueObject\Uuid;
 
 class ClientProfile extends Profile
 {
+    public string $company {
+        get => $this->company;
+        set => $value;
+    }
+
+    public string $position {
+        get => $this->position;
+        set => $value;
+    }
+
+    public string $about {
+        get => $this->about;
+        set => $value;
+    }
+
+    public string $industry {
+        get => $this->industry;
+        set => $value;
+    }
+    
+
     public function __construct(
         Uuid $id,
         Uuid $userId,
-        Money $balance
+        Money $balance,
+        string $company = "",
+        string $position = "",
+        string $about = "",
+        string $industry = "",
     ) {
         $this->id = $id;
         $this->userId = $userId;
         $this->balance = $balance;
+        $this->company = $company;
+        $this->position = $position;
+        $this->about = $about;
+        $this->industry = $industry;
     }
 
     public static function create(Uuid $id, Uuid $userId): self
