@@ -48,8 +48,8 @@ class ClientProfile extends Profile
         $this->industry = $industry;
     }
 
-    public static function create(Uuid $id, Uuid $userId): self
+    public static function create(Uuid $userId): self
     {
-        return new self($id, $userId, new Money(0.0, 'USD'));
+        return new self(Uuid::generate(), $userId, new Money(0.0, 'USD'));
     }
 }

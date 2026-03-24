@@ -6,11 +6,9 @@ namespace App\Reservation\Application\UseCase;
 
 use App\Reservation\Domain\Entity\User;
 use App\Reservation\Domain\Entity\ClientProfile;
-use App\Reservation\Domain\ValueObject\Uuid;
 use App\Reservation\Domain\ValueObject\Email;
 use App\Reservation\Domain\ValueObject\UserRole;
 use App\Reservation\Application\DTO\RegisterUserRequest;
-use App\Reservation\Application\Service\AuthService;
 use App\Reservation\Domain\Repository\ClientProfileRepositoryInterface;
 use App\Reservation\Domain\Repository\UserRepositoryInterface;
 
@@ -39,19 +37,16 @@ class RegisterUserUseCase
             throw new \Exception('Invalid email address', 401);
         }
 
-        $user = new User(
-            id: Uuid::generate(),
+        $user = User::register(
             email: new Email($userDTO->email),
             name: $userDTO->name,
-            passwordHash: password_hash($userDTO->password, PASSWORD_DEFAULT),
-            role: UserRole::Client,
-            createdAt: new \DateTime()
+            passwordHash: password_hash($userDTO->password, PASSWORD_DEFAULT)
+
         );
 
         switch($user->role) {
             case UserRole::Client:
                 $clientProfile = ClientProfile::create(
-                    id: Uuid::generate(),
                     userId: $user->id
                 );
                 $this->clientProfileRepository->save($clientProfile);
