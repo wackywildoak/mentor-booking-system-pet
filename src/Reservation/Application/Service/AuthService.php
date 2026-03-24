@@ -9,8 +9,10 @@ use App\Reservation\Domain\ValueObject\Uuid;
 use App\Reservation\Domain\ValueObject\Email;
 use App\Reservation\Domain\ValueObject\UserRole;
 use App\Reservation\Domain\Repository\UserRepositoryInterface;
+use App\Reservation\Domain\Repository\ClientProfileRepositoryInterface;
 use App\Reservation\Application\DTO\RegisterUserRequest;
 use App\Reservation\Application\DTO\LoginUserRequest;
+use App\Reservation\Domain\Entity\ClientProfile;
 use App\Reservation\Infrastructure\Auth\JwtManager;
 use App\Reservation\Infrastructure\Auth\RefreshTokenStorage;
 use OutOfBoundsException;
@@ -20,6 +22,7 @@ class AuthService
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
+        private ClientProfileRepositoryInterface $clientProfileRepository,
         private RefreshTokenStorage $tokenStorage,
         private JwtManager $jwtManager
     ) {}
@@ -52,6 +55,15 @@ class AuthService
             role: UserRole::Client,
             createdAt: new \DateTime()
         );
+
+        switch($user->role) {
+            case UserRole::Client:
+                $clientProfile = ClientProfile::create(
+                    id: Uuid::generate(),
+                    userId: $user->id
+                );
+                $this->clientProfileRepository->save($clientProfile);
+        }
 
         $this->userRepository->save($user);
     }
