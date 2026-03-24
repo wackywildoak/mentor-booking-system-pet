@@ -17,8 +17,8 @@ class JwtManager
     public function handle(User $user): string
     {
         $payload = [
-            'sub' => $user->id,
-            'email' => $user->email,
+            'sub' => $user->id->value,
+            'email' => $user->email->value,
             'name' => $user->name,
             'role' => $user->role,
             'createdAt' => (new \DateTime())->format('H:i:s')
