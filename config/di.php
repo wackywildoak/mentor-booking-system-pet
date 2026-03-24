@@ -33,9 +33,16 @@ return [
         );
     },
 
+    Contract\ClientProfileRepositoryInterface::class => function ($container) {
+        return new Repository\DoctrineClientProfileRepository(
+            $container->get(EntityManagerInterface::class)
+        );
+    },
+
     Service\AuthService::class => function ($container) {
         return new Service\AuthService(
             $container->get(Contract\UserRepositoryInterface::class),
+            $container->get(Contract\ClientProfileRepositoryInterface::class),
             $container->get(RefreshTokenStorage::class),
             $container->get(JwtManager::class)
         );

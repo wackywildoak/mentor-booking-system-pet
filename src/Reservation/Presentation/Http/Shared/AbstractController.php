@@ -9,9 +9,13 @@ use App\Reservation\Presentation\Http\Response\Response;
 
 abstract class AbstractController
 {
-    protected function getRequest(): Request
+    public function __construct(
+        protected Request $request
+    ) {}
+
+    public function getRequest(): Request
     {
-        return Request::fromGlobals();
+        return $this->request;
     }
 
     public function response(
