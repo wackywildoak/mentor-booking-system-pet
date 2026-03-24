@@ -3,12 +3,18 @@
 namespace App\Reservation\Presentation\Http\Controller;
 
 use App\Reservation\Application\Service\AuthService;
+use App\Reservation\Application\UseCase\LoginUserUseCase;
+use App\Reservation\Application\UseCase\RegisterUserUseCase;
+use App\Reservation\Presentation\Http\Request\Request;
 use App\Reservation\Presentation\Http\Shared\AbstractController;
 
 class AuthController extends AbstractController
 {
     public function __construct(
+        protected Request $request,
         private AuthService $authService,
+        private RegisterUserUseCase $registerUserUseCase,
+        private LoginUserUseCase $loginUserUseCase,
     ) {}
 
     public function register(
@@ -24,7 +30,7 @@ class AuthController extends AbstractController
         );
 
         try {
-            $this->authService->register($dto);
+            $this->registerUserUseCase->execute($dto);
         } catch (\Exception $e) {
             $this->response(
                 statusCode: $e->getCode(),
@@ -45,7 +51,7 @@ class AuthController extends AbstractController
 
         try {
             $this->response(
-                data: $this->authService->login($dto)
+                data: $this->loginUserUseCase->execute($dto)
             );
         } catch (\Exception $e) {
             $this->response(
