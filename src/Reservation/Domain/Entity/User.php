@@ -10,6 +10,8 @@ use App\Reservation\Domain\ValueObject\UserRole;
 
 class User
 {
+    private const DEFAULT_ROLE = UserRole::Client;
+
     /** @var Uuid Уникальный идентификатор пользователя */
     public Uuid $id {
         get => $this->id;
@@ -40,8 +42,6 @@ class User
         set => $value;
     }
 
-    private const DEFAULT_ROLE = UserRole::Client;
-
     /** @var \DateTime Дата создания пользователя */
     public \DateTime $createdAt {
         get => $this->createdAt;
@@ -58,6 +58,12 @@ class User
             role: self::DEFAULT_ROLE,
             createdAt: new \DateTime()
         );
+    }
+
+    public function assignRole(UserRole $role): self
+    {
+        $this->role = $role;
+        return $this;
     }
 
     public function isMentor(): bool
