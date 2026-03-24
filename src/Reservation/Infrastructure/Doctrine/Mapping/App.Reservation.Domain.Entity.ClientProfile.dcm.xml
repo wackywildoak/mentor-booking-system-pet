@@ -3,5 +3,9 @@
         <id name="id" type="app_uuid" column="id" length="36"/>
         <id name="userId" type="app_uuid" column="user_id" length="36"/>
         <embedded name="balance" class="App\Reservation\Domain\ValueObject\Money"/>
+        <field name="company" type="string" length="255"/>
+        <field name="position" type="string" length="255"/>
+        <field name="about" type="string" length="255"/>
+        <field name="industry" type="string" length="255"/>
     </entity>
 </doctrine-mapping>

@@ -19,7 +19,7 @@ class DoctrineClientProfileRepository implements ClientProfileRepositoryInterfac
 
     public function findByUserId(string $userId): ?ClientProfile
     {
-        return $this->em->getRepository(ClientProfile::class)->findOneBy(['user_id' => $userId]);
+        return $this->em->getRepository(ClientProfile::class)->findOneBy(['userId' => $userId]);
     }
 
     public function save(ClientProfile $user): void
