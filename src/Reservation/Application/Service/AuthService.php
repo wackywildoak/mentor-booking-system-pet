@@ -9,16 +9,20 @@ use App\Reservation\Domain\ValueObject\Uuid;
 use App\Reservation\Domain\ValueObject\Email;
 use App\Reservation\Domain\ValueObject\UserRole;
 use App\Reservation\Domain\Repository\UserRepositoryInterface;
+use App\Reservation\Domain\Repository\ClientProfileRepositoryInterface;
 use App\Reservation\Application\DTO\RegisterUserRequest;
 use App\Reservation\Application\DTO\LoginUserRequest;
+use App\Reservation\Domain\Entity\ClientProfile;
 use App\Reservation\Infrastructure\Auth\JwtManager;
 use App\Reservation\Infrastructure\Auth\RefreshTokenStorage;
+use OutOfBoundsException;
 use Exception;
 
 class AuthService
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
+        private ClientProfileRepositoryInterface $clientProfileRepository,
         private RefreshTokenStorage $tokenStorage,
         private JwtManager $jwtManager
     ) {}
@@ -51,6 +55,15 @@ class AuthService
             role: UserRole::Client,
             createdAt: new \DateTime()
         );
+
+        switch($user->role) {
+            case UserRole::Client:
+                $clientProfile = ClientProfile::create(
+                    id: Uuid::generate(),
+                    userId: $user->id
+                );
+                $this->clientProfileRepository->save($clientProfile);
+        }
 
         $this->userRepository->save($user);
     }
@@ -148,7 +161,7 @@ class AuthService
         return $this->generateTokens($user, $familyId);
     }
 
-    public function validateToken(string $token): void
+    public function validateToken(string $token): User
     {
         try {
             $payload = $this->jwtManager->validateToken($token);
@@ -159,5 +172,13 @@ class AuthService
         if ($payload['exp'] < time()) {
             throw new Exception('Время действия токена истекло', 401);
         }
+
+        $user = $this->userRepository->find($payload['sub']);
+
+        if (!$user) {
+            throw new OutOfBoundsException('Пользователь не найден');
+        }
+
+        return $user;
     }
 }

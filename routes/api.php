@@ -1,12 +1,15 @@
 <?php
 
+use App\Reservation\Domain\ValueObject\UserRole;
 use App\Reservation\Presentation\Http\Controller;
 use App\Reservation\Presentation\Http\Request\Request;
-use App\Reservation\Infrastructure\Middleware\AuthMiddleware;
+use App\Reservation\Infrastructure\Middleware;
 
 /** @var \DI\Container $container */
 
 $router = new \Bramus\Router\Router();
+$request = Request::fromGlobals();
+$container->set(Request::class, $request);
 
 $router->set404('(/.*)?', function() {
     header('HTTP/1.1 404 Not Found');
@@ -14,10 +17,9 @@ $router->set404('(/.*)?', function() {
     echo json_encode(['status' => '404', 'status_text' => 'route not defined']);
 });
 
-$router->before('GET|POST', '/.*', function() use ($container) {
+$router->before('GET|POST', '/.*', function() use ($request, $container) {
     $publicRoutes = [
         '/auth/login',
-        '/auth/logout',
         '/auth/register',
         '/auth/refresh',
     ];
@@ -26,22 +28,14 @@ $router->before('GET|POST', '/.*', function() use ($container) {
         return;
     }
 
-    $authMiddleware = $container->get(AuthMiddleware::class);
+    $authMiddleware = $container->get(Middleware\AuthMiddleware::class);
 
-    $request = Request::fromGlobals();
     $authMiddleware->handle($request);
 });
 
-$router->mount('/users', function() use ($router, $container) {
-    $controller = $container->get(Controller\UserController::class);
-
-    $router->get('/', function() use ($controller) {
-        $controller->listUsers();
-    });
-
-    $router->get('/(\S+)', function($email) use ($controller) {
-        $controller->getUserByEmail($email);
-    });
+$router->before('GET|POST', '/client(/.*)?', function() use ($request, $container) {
+    $container->get(Middleware\RoleMiddleware::class)
+        ->handle($request, [UserRole::Client]);
 });
 
 $router->mount('/auth', function() use ($router, $container) {
@@ -70,6 +64,26 @@ $router->mount('/auth', function() use ($router, $container) {
 
     $router->post('/refresh', function() use ($controller) {
         $controller->refresh();
+    });
+});
+
+$router->mount('/users', function() use ($router, $container) {
+    $controller = $container->get(Controller\UserController::class);
+
+    $router->get('/', function() use ($controller) {
+        $controller->listUsers();
+    });
+
+    $router->get('/(\S+)', function($email) use ($controller) {
+        $controller->getUserByEmail($email);
+    });
+});
+
+$router->mount('/client', function() use ($router, $container, $request) {
+    $controller = $container->get(Controller\ClientProfileController::class);
+
+    $router->get('/profile', function() use ($controller) {
+        $controller->index();
     });
 });
 
