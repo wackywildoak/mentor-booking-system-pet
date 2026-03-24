@@ -3,11 +3,13 @@
 namespace App\Reservation\Presentation\Http\Controller;
 
 use App\Reservation\Domain\Repository\UserRepositoryInterface;
+use App\Reservation\Presentation\Http\Request\Request;
 use App\Reservation\Presentation\Http\Shared\AbstractController;
 
 class UserController extends AbstractController
 {
     public function __construct(
+        protected Request $request,
         private UserRepositoryInterface $userRepository
     ) {}
 
