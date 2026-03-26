@@ -37,6 +37,10 @@ $router->before('GET|POST', '/client(/.*)?', function() use ($request, $containe
     $container->get(Middleware\RoleMiddleware::class)
         ->handle($request, [UserRole::Client]);
 });
+$router->before('GET|POST', '/mentor(/.*)?', function() use ($request, $container) {
+    $container->get(Middleware\RoleMiddleware::class)
+        ->handle($request, [UserRole::Mentor]);
+});
 
 $router->mount('/auth', function() use ($router, $container, $request) {
     $controller = $container->get(Controller\AuthController::class);
@@ -82,6 +86,14 @@ $router->mount('/users', function() use ($router, $container) {
 
 $router->mount('/client', function() use ($router, $container, $request) {
     $controller = $container->get(Controller\ClientProfileController::class);
+
+    $router->get('/profile', function() use ($controller) {
+        $controller->index();
+    });
+});
+
+$router->mount('/mentor', function() use ($router, $container, $request) {
+    $controller = $container->get(Controller\MentorProfileController::class);
 
     $router->get('/profile', function() use ($controller) {
         $controller->index();
