@@ -9,17 +9,20 @@ use App\Reservation\Domain\Entity\ClientProfile;
 use App\Reservation\Domain\ValueObject\Email;
 use App\Reservation\Domain\ValueObject\UserRole;
 use App\Reservation\Application\DTO\RegisterUserRequest;
+use App\Reservation\Domain\Entity\MentorProfile;
 use App\Reservation\Domain\Repository\ClientProfileRepositoryInterface;
+use App\Reservation\Domain\Repository\MentorProfileRepositoryInterface;
 use App\Reservation\Domain\Repository\UserRepositoryInterface;
 
 class RegisterUserUseCase
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
-        private ClientProfileRepositoryInterface $clientProfileRepository
+        private ClientProfileRepositoryInterface $clientProfileRepository,
+        private MentorProfileRepositoryInterface $mentorProfileRepository
     ) {}
 
-    public function execute(RegisterUserRequest $userDTO)
+    public function execute(RegisterUserRequest $userDTO): void
     {
         if ($this->userRepository->findByEmail($userDTO->email) !== null) {
             throw new \Exception('User with this email already exists', 401);
@@ -40,9 +43,11 @@ class RegisterUserUseCase
         $user = User::register(
             email: new Email($userDTO->email),
             name: $userDTO->name,
-            passwordHash: password_hash($userDTO->password, PASSWORD_DEFAULT)
-
+            passwordHash: password_hash($userDTO->password, PASSWORD_DEFAULT),
+            role: UserRole::tryFrom($userDTO->role)
         );
+
+        $this->userRepository->save($user);
 
         switch($user->role) {
             case UserRole::Client:
@@ -50,8 +55,11 @@ class RegisterUserUseCase
                     userId: $user->id
                 );
                 $this->clientProfileRepository->save($clientProfile);
+            case UserRole::Mentor:
+                $mentorProfile = MentorProfile::create(
+                    userId: $user->id
+                );
+                $this->mentorProfileRepository->save($mentorProfile);
         }
-
-        $this->userRepository->save($user);
     }
 }
