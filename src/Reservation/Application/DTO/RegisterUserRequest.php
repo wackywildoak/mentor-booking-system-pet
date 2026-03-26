@@ -10,23 +10,6 @@ class RegisterUserRequest
         public string $email,
         public string $name,
         public string $password,
+        public ?string $role,
     ) {}
-
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            email: $data['email'],
-            name: $data['name'],
-            password: $data['password'],
-        );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'email' => $this->email,
-            'name' => $this->name,
-            'password' => $this->password,
-        ];
-    }
 }

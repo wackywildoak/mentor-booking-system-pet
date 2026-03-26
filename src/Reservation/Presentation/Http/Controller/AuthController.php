@@ -21,12 +21,14 @@ class AuthController extends AbstractController
         $email,
         $name,
         $password,
+        $role
     ): void
     {  
         $dto = new \App\Reservation\Application\DTO\RegisterUserRequest(
             email: $email,
             name: $name,
             password: $password,
+            role: $role
         );
 
         try {
