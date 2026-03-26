@@ -9,5 +9,5 @@ return [
         'DoctrineMigrations' => '/../migrations',
     ],
 
-    'all_or_nothing' => true,
+    'all_or_nothing' => false,
 ];
