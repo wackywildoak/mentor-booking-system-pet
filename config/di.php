@@ -39,6 +39,12 @@ return [
         );
     },
 
+    Contract\MentorProfileRepositoryInterface::class => function ($container) {
+        return new Repository\DoctrineMentorProfileRepository(
+            $container->get(EntityManagerInterface::class)
+        );
+    },
+
     Service\AuthService::class => function ($container) {
         return new Service\AuthService(
             $container->get(Contract\UserRepositoryInterface::class),

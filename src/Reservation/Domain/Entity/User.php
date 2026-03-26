@@ -10,6 +10,8 @@ use App\Reservation\Domain\ValueObject\UserRole;
 
 class User
 {
+    private const DEFAULT_ROLE = UserRole::Client;
+
     /** @var Uuid Уникальный идентификатор пользователя */
     public Uuid $id {
         get => $this->id;
@@ -40,24 +42,49 @@ class User
         set => $value;
     }
 
-    private const DEFAULT_ROLE = UserRole::Client;
-
     /** @var \DateTime Дата создания пользователя */
     public \DateTime $createdAt {
         get => $this->createdAt;
         set => $value;
     }
 
-    public static function register(Email $email, string $name, string $passwordHash): self
+    public function __construct(
+        Uuid $id,
+        Email $email,
+        string $name,
+        string $passwordHash,
+        UserRole $role,
+        \DateTime $createdAt
+    ) {
+        $this->id = $id;
+        $this->email = $email;
+        $this->name = $name;
+        $this->passwordHash = $passwordHash;
+        $this->role = $role;
+        $this->createdAt = $createdAt;
+    }
+
+    public static function register(
+        Email $email, 
+        string $name, 
+        string $passwordHash, 
+        ?UserRole $role = null
+    ): self
     {
         return new self(
             id: Uuid::generate(),
             email: $email,
             name: $name,
             passwordHash: $passwordHash,
-            role: self::DEFAULT_ROLE,
+            role: $role ?? self::DEFAULT_ROLE,
             createdAt: new \DateTime()
         );
+    }
+
+    public function assignRole(UserRole $role): self
+    {
+        $this->role = $role;
+        return $this;
     }
 
     public function isMentor(): bool

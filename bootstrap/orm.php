@@ -20,6 +20,9 @@ $ormConfig = ORMSetup::createXMLMetadataConfig(
 $ormConfig->setProxyDir(__DIR__ . '/../../proxies');
 $ormConfig->setProxyNamespace('App\Proxies');
 $ormConfig->setAutoGenerateProxyClasses(true);
+$ormConfig->setSchemaAssetsFilter(static function (string $assetName): bool {
+    return !in_array($assetName, ['refresh_tokens'], true);
+});
 
 $connection = DriverManager::getConnection(
     params: [
